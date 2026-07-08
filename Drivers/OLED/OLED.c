@@ -316,3 +316,118 @@ void OLED_Init(void)
 		
 	OLED_Clear();				//OLED清屏
 }
+
+/**
+  * @brief  OLED画点
+  * @param  X 点的X坐标，范围：0~127
+  * @param  Y 点的Y坐标，范围：0~63
+  * @retval 无
+  */
+void OLED_DrawPoint(uint8_t X, uint8_t Y)
+{
+	if (X > 127 || Y > 63)
+	{
+		return;
+	}
+
+	OLED_SetCursor(Y / 8, X);
+	OLED_WriteData(1 << (Y % 8));
+}
+
+/**
+  * @brief  OLED画直线（Bresenham）
+  * @param  X0 起点X坐标
+  * @param  Y0 起点Y坐标
+  * @param  X1 终点X坐标
+  * @param  Y1 终点Y坐标
+  * @retval 无
+  */
+void OLED_DrawLine(uint8_t X0, uint8_t Y0, uint8_t X1, uint8_t Y1)
+{
+	int16_t x0 = X0, y0 = Y0;
+	int16_t x1 = X1, y1 = Y1;
+	int16_t dx = (x1 > x0) ? (x1 - x0) : (x0 - x1);
+	int16_t sx = (x0 < x1) ? 1 : -1;
+	int16_t dy = (y1 > y0) ? (y0 - y1) : (y1 - y0);
+	int16_t sy = (y0 < y1) ? 1 : -1;
+	int16_t err = dx + dy;
+	int16_t e2;
+
+	while (1)
+	{
+		OLED_DrawPoint((uint8_t)x0, (uint8_t)y0);
+		if (x0 == x1 && y0 == y1)
+		{
+			break;
+		}
+		e2 = 2 * err;
+		if (e2 >= dy)
+		{
+			err += dy;
+			x0 += sx;
+		}
+		if (e2 <= dx)
+		{
+			err += dx;
+			y0 += sy;
+		}
+	}
+}
+
+/**
+  * @brief  OLED画矩形（空心）
+  * @param  X 左上角X坐标
+  * @param  Y 左上角Y坐标
+  * @param  Width 矩形宽度
+  * @param  Height 矩形高度
+  * @retval 无
+  */
+void OLED_DrawRect(uint8_t X, uint8_t Y, uint8_t Width, uint8_t Height)
+{
+	if (Width == 0 || Height == 0)
+	{
+		return;
+	}
+
+	OLED_DrawLine(X, Y, X + Width - 1, Y);
+	OLED_DrawLine(X, Y + Height - 1, X + Width - 1, Y + Height - 1);
+	OLED_DrawLine(X, Y, X, Y + Height - 1);
+	OLED_DrawLine(X + Width - 1, Y, X + Width - 1, Y + Height - 1);
+}
+
+/**
+  * @brief  OLED画圆（中点圆算法，空心）
+  * @param  X0 圆心X坐标
+  * @param  Y0 圆心Y坐标
+  * @param  Radius 半径
+  * @retval 无
+  */
+void OLED_DrawCircle(uint8_t X0, uint8_t Y0, uint8_t Radius)
+{
+	int16_t x = 0;
+	int16_t y = Radius;
+	int16_t d = 1 - Radius;
+
+	while (x <= y)
+	{
+		OLED_DrawPoint((uint8_t)(X0 + x), (uint8_t)(Y0 + y));
+		OLED_DrawPoint((uint8_t)(X0 + y), (uint8_t)(Y0 + x));
+		OLED_DrawPoint((uint8_t)(X0 - x), (uint8_t)(Y0 + y));
+		OLED_DrawPoint((uint8_t)(X0 - y), (uint8_t)(Y0 + x));
+		OLED_DrawPoint((uint8_t)(X0 + x), (uint8_t)(Y0 - y));
+		OLED_DrawPoint((uint8_t)(X0 + y), (uint8_t)(Y0 - x));
+		OLED_DrawPoint((uint8_t)(X0 - x), (uint8_t)(Y0 - y));
+		OLED_DrawPoint((uint8_t)(X0 - y), (uint8_t)(Y0 - x));
+
+		x++;
+		if (d < 0)
+		{
+			d += 2 * x + 1;
+		}
+		else
+		{
+			y--;
+			d += 2 * (x - y) + 1;
+		}
+	}
+}

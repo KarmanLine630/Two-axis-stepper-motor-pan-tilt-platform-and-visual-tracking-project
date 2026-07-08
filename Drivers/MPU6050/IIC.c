@@ -5,7 +5,7 @@
 #define GPIO_PORT_IIC     GPIOB                       /* GPIO端口 */
 #define RCC_IIC_ENABLE    __HAL_RCC_GPIOB_CLK_ENABLE()       /* GPIO端口时钟 */
 #define IIC_SCL_PIN       GPIO_PIN_1                  /* 连接到SCL时钟线的GPIO */
-#define IIC_SDA_PIN       GPIO_PIN_  0                 /* 连接到SDA数据线的GPIO */
+#define IIC_SDA_PIN       GPIO_PIN_0                 /* 连接到SDA数据线的GPIO */
 
 /* 定义读写SCL和SDA的宏，已增加代码的可移植性和可阅读性 */
 #if 1	/* 条件编译： 1 选择GPIO的库函数实现IO读写 */
